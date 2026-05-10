@@ -414,17 +414,3 @@ with dependency overrides for `get_db`, `get_redis`, `verify_mtls`).
 - SQLite compatibility for tests: `app/models/base.py` uses `JSONB.with_variant(JSON(), "sqlite")`;
   `app/storage/database.py` skips `pool_size`/`max_overflow` kwargs when `database_url`
   starts with `sqlite`.
-
----
-
-## References
-
-- **Figure 12** — Hospital Server Components
-- **Figure 13** — Hospital Server Class Diagram
-- **Figure 14** — Hospital Server Entity Diagram
-- **Figure 15** — Complete session data flow trace
-- **Figure 16** — Trust Ledger membership admission sequence
-- **Figure 17** — Cross-hospital data exchange sequence
-- **Figure 18** — Emergency access sequence (App Server orchestrated)
-- **Table 2** — Full API Gateway routing table
-- **Table 3** — Redis session status transitions
