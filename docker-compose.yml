@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dhrs
+      POSTGRES_PASSWORD: dhrs
+      POSTGRES_DB: hospital_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - dhrs_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dhrs -d hospital_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    networks:
+      - dhrs_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  hospital_server:
+    build:
+      context: .
+      target: production
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./certs:/run/secrets:ro
+    networks:
+      - dhrs_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  test:
+    build:
+      context: .
+      target: test
+    environment:
+      DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+      REDIS_URL: "redis://localhost:6379/0"
+      HSK_PEM_PATH: /dev/null
+      KEK_HEX: abababababababababababababababababababababababababababababababababab
+      HOSPITAL_ID: test-hospital
+      MTLS_CA_CERT_PATH: /dev/null
+    profiles:
+      - test
+
+volumes:
+  pgdata:
+
+networks:
+  dhrs_net:
+    internal: false
